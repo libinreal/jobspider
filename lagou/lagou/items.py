@@ -27,5 +27,4 @@ class JobItem(scrapy.Item):
 	
 	description = scrapy.Field()#职位描述、任职要求
 	addr = scrapy.Field()#工作地址
-	
-    pass
+

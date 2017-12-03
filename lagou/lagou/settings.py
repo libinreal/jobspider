@@ -68,6 +68,17 @@ ROBOTSTXT_OBEY = False
 #    'lagou.pipelines.LagouPipeline': 300,
 #}
 
+ITEM_PIPELINES = {
+	'lagou.pipelines.JobPipeline':300
+}
+COOKIES_ENABLED = True
+
+MONGODB_HOST = '192.168.68.128'
+MONGODB_PORT = 27017
+MONGODB_DB = 'social_listening'
+MONGODB_COLLECTION = 'jobs'
+
+
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True
