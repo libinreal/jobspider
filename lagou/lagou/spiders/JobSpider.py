@@ -47,13 +47,13 @@ class JobSpider(scrapy.Spider):
 
         #dict for spell query string
         filterDict = {
-            'city':[u'上海'],#cannot use turple<元组>
+            'city':['上海'],#cannot use turple<元组>
             'jd':[],#融资阶段
-            'px':u'default',#排序方式
-            'district':[u'徐汇区'],#行政区
-            'bizArea':[u'漕宝路', u'上海南站', u'植物园', u'上海师大', u'田林', u'龙华'],#商区
-            #'needAddtionalResult':False,
-            #'isSchoolJob':0
+            'px':'default',#排序方式
+            'district':['徐汇区'],#行政区
+            'bizArea':['漕宝路', '上海南站', '植物园', '上海师大', '田林', '龙华'],#商区
+            'needAddtionalResult':'false',
+            'isSchoolJob':0
         }
 
         #key word list for searching job
@@ -86,7 +86,7 @@ class JobSpider(scrapy.Spider):
             else:
                 fks = filterDict[fk]
 
-            if len(fks) == 0:
+            if type(fks) == str or type(fks) == unicode and len(fks) == 0:
                 continue
 
             #spell query string such as: city=上海&…
@@ -99,14 +99,17 @@ class JobSpider(scrapy.Spider):
         #dynamic form data
         for kd in kdList:
             self.kd = kd
-
+            '''
             dc = {'url':self.reqUrl, 'formdata':{'pn':self.pageNo,'kd':self.kd,'first':False}, 'method':'POST', 'headers':self.header, 'callback':self.parse}
             print dc
             sys.exit()
-
-            yield scrapy.http.FormRequest(url=self.reqUrl, formdata={'pn':self.pageNo,'kd':self.kd,'first':'false'}, method='POST', headers=self.header, callback=self.parse)
+            '''
+            yield scrapy.http.FormRequest(url=self.reqUrl, formdata={'pn':str(self.pageNo),'kd':self.kd,'first':'false'}, method='POST', headers=self.header, callback=self.parse)
 
     def parse(self, response):
+        fp = open('1.html','a+')
+        fp.write(response.body)
+        fp.close()
         '''
         override处理下载的response的默认方法
 
@@ -134,7 +137,7 @@ class JobSpider(scrapy.Spider):
         jsonContent = jsonData['content']
         jsonResult = jsonContent['positionResult']
         jsonItems = jsonResult['result']
-
+        print jsonData,jsonItems,' parse '
         self.pageCount = jsonResult['totalCount'] / jsonContent['pageSize'] + 1
 
         for e in jsonItems:
@@ -147,4 +150,4 @@ class JobSpider(scrapy.Spider):
             print e['industryField']
 
         if self.pageNo <= self.pageCount:
-            yield scrapy.http.FormRequest(url=self.reqUrl, formdata={'pn':self.pageNo,'kd':self.kd,'first':False}, method='POST', headers=self.header, callback=self.parse)
+            yield scrapy.http.FormRequest(url=self.reqUrl, formdata={'pn':str(self.pageNo),'kd':self.kd,'first':'false'}, method='POST', headers=self.header, callback=self.parse)
