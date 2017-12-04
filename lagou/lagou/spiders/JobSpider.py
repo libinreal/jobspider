@@ -1,33 +1,110 @@
 # -*- coding: utf-8 -*-
 
+import sys
 import scrapy
+import json
 
 class JobSpider(scrapy.Spider):
     allowed_domains = ["lagou.com"]
 
     name = 'Job'
 
-    GET_DATA = {
-        'city':'',#城市
-        'district':'',#商区
-        'gj':'',#工作经验 ','分割
-        'xl':'',#学历要求 ','分割
-        'jd':'',#融资阶段 ','分割
-        'hy':'',#行业领域 ','分割
-        'yx':'',#月薪 
-        'gx':''#工作性质
-    }
-
+    '''paganation info'''
     pageCount = 0
     pageNo = 1
 
-    start_urls = [
-        "https://www.lagou.com/jobs/positionAjax.json"
-    ]#使用 start_urls 的url生成Request
-    
-    def start_requests():
-        for url in start_urls:
-            yield Request(url=url, method='POST', body={'pn':str(self.pageNo),'first':False,'kd':'PHP'},callback=self.parse)
+    #current request url 
+    reqUrl = ''
+
+    #current kd
+    kd = ''
+
+    header = {
+        'Accept':'Accept:application/json, text/javascript, */*; q=0.01',
+        'Accept-Language':'zh-CN,zh;q=0.9,en;q=0.8',
+        'Accept-Encoding':'gzip, deflate, br',
+        'Host':'www.lagou.com',
+        'User-Agent':[
+            'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36 Edge/15.15063'
+        ],
+        'Referer':'https://www.lagou.com/jobs/list_PHP',
+        'X-Requested-With':'XMLHttpRequest',
+        'X-Anit-Forge-Token':'None',
+        'X-Anit-Forge-Code':'0'
+    }
+
+
+
+    def start_requests(self):
+        '''
+        check job with multiple kd <key word> and multiple location
+        '''
+        
+
+        #ajax query string spelled base on filterDict
+        queryStr = ''
+
+        #dict for spell query string
+        filterDict = {
+            'city':[u'上海'],#cannot use turple<元组>
+            'jd':[],#融资阶段
+            'px':u'default',#排序方式
+            'district':[u'徐汇区'],#行政区
+            'bizArea':[u'漕宝路', u'上海南站', u'植物园', u'上海师大', u'田林', u'龙华'],#商区
+            #'needAddtionalResult':False,
+            #'isSchoolJob':0
+        }
+
+        #key word list for searching job
+        kdList = ['PHP', 'Python', 'Go']
+
+        for fk in filterDict:
+            
+            #current spelled string for value of fk in filterDict
+            fks = ''
+
+            #list type
+            if type(filterDict[fk]) == list:
+                #loop fki in filerDict[fk]:[fki … ]
+                for fki in filterDict[fk]:
+                    if type(fki) == str or type(fki) == unicode:
+                        if fki.strip() == '':
+                            continue
+                        else:
+                            fks = fks + '%s,' % fki
+                if len(fks) > 0:
+                    fks = fks[0:-1]
+
+            #string type
+            elif type(filterDict[fk]) == str or type(filterDict[fk]) == unicode:
+                if fki.strip() == '':
+                    continue
+                fks = filterDict[fk]
+
+            #other types e.g. int,boolean,object…
+            else:
+                fks = filterDict[fk]
+
+            if len(fks) == 0:
+                continue
+
+            #spell query string such as: city=上海&…
+            queryStr = queryStr + '%s=%s&' % (fk, fks)
+
+        #constant request url
+        urlWithQueryStr = 'https://www.lagou.com/jobs/positionAjax.json?%s' % queryStr[0:-1]
+        self.reqUrl = urlWithQueryStr
+
+        #dynamic form data
+        for kd in kdList:
+            self.kd = kd
+
+            dc = {'url':self.reqUrl, 'formdata':{'pn':self.pageNo,'kd':self.kd,'first':False}, 'method':'POST', 'headers':self.header, 'callback':self.parse}
+            print dc
+            sys.exit()
+
+            yield scrapy.http.FormRequest(url=self.reqUrl, formdata={'pn':self.pageNo,'kd':self.kd,'first':'false'}, method='POST', headers=self.header, callback=self.parse)
 
     def parse(self, response):
         '''
@@ -69,3 +146,5 @@ class JobSpider(scrapy.Spider):
             print e['education']
             print e['industryField']
 
+        if self.pageNo <= self.pageCount:
+            yield scrapy.http.FormRequest(url=self.reqUrl, formdata={'pn':self.pageNo,'kd':self.kd,'first':False}, method='POST', headers=self.header, callback=self.parse)

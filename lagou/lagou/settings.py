@@ -27,10 +27,12 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
-#CONCURRENT_REQUESTS_PER_DOMAIN = 16
+CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
+CONCURRENT_ITEMS = 30
+CONCURRENT_REQUESTS = 16
 
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
@@ -39,10 +41,13 @@ ROBOTSTXT_OBEY = False
 #TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-#DEFAULT_REQUEST_HEADERS = {
-#   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-#   'Accept-Language': 'en',
-#}
+DEFAULT_REQUEST_HEADERS = {
+	'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+	'Accept-Language':'zh-CN,zh;q=0.9,en;q=0.8',
+	'Accept-Encoding':'gzip, deflate, br',
+	'Host':'www.lagou.com',
+	'User-Agent':'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'
+}
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
@@ -71,7 +76,6 @@ ROBOTSTXT_OBEY = False
 ITEM_PIPELINES = {
 	'lagou.pipelines.JobPipeline':300
 }
-COOKIES_ENABLED = True
 
 MONGODB_HOST = '192.168.68.128'
 MONGODB_PORT = 27017

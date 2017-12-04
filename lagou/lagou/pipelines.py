@@ -4,27 +4,26 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
-import pymongo
+from pymongo import MongoClient
 
 from scrapy.conf import settings
 from scrapy.exceptions import DropItem
-from scrapy import log
+import logging
 
 class JobPipeline(object):
-	def __init__(self):
-		mongoConnection = pymongo.Connection(
+    def __init__(self):
+        mongoClient = MongoClient(
             settings['MONGODB_HOST'],
             settings['MONGODB_PORT']
         )
-        db = mongoConnection[settings['MONGODB_DB']]
+        db = mongoClient[settings['MONGODB_DB']]
         self.collection = db[settings['MONGODB_COLLECTION']]
         self.ids = set()
 
     def process_item(self, item, spider):
         if item['id'] in self.ids:  
-            raise DropItem("Duplicate item found: (id)%s" % item['id'])  
-        else: 
-        	self.collection.insert(dict(item))
-        	log.msg("Lagou Job added to MongoDB",
-                level=log.DEBUG, spider=spider)
+            raise DropItem("Duplicate item found: (id)%s" % item['id'])
+        else:
+            self.collection.insert(dict(item))
+            logging.log("Lagou Job added to MongoDB", level=log.DEBUG, spider=spider)
         return item
