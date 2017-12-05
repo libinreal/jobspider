@@ -105,7 +105,7 @@ MONGODB_COLLECTION = 'jobs'
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 #是否启用logging
-LOG_ENABLED = True
+LOG_ENABLED = False
 
 #logging输出的文件名
 LOG_FILE = None

@@ -162,7 +162,7 @@ class JobSpider(scrapy.Spider):
             #dynamic form data
             for kd in kdList:
 
-                print "1", "\t", reqUrl, "\t", kd
+                # print "1", "\t", reqUrl, "\t", kd
 
                 yield scrapy.http.FormRequest(url=reqUrl, formdata={'pn':'1','kd':kd,'first':'false'}, method='POST', headers=self.header, callback=self.parse)
 
@@ -209,7 +209,7 @@ class JobSpider(scrapy.Spider):
         '''
 
         #debug
-        
+        '''
         for (rk, rv) in jsonResult.items():
             if rk == 'totalCount':
                 print '%s:%s' % (rk, rv)
@@ -217,10 +217,10 @@ class JobSpider(scrapy.Spider):
                 print '%s:%s' % (rk, rv)
             elif rk == 'result':
                 print '%s:%s' % (rk, rv)
-        
-
+        '''
+        print "\n\n",response.request.body
         for e in jsonItems:
-            '''
+            
             print e['companyId'] #公司id
             print e['positionId'] #职位id
             print e['subwayline'] #地铁线
@@ -228,15 +228,16 @@ class JobSpider(scrapy.Spider):
             print e['district']
             print e['education']
             print e['industryField']
-            '''
-            pass
-            
+            print e['positionName']
+
+        print "\n\n"
+        
         if jsonContent['pageNo'] < totalPageCount:
             
             #last request form data
             d = self.__getFormDataFromResponse(response)
             #next page
-            d['pn'] = int(d['pn']) + 1
+            d['pn'] = str( int(d['pn']) + 1 )
 
             # print self.pageNo, "\t", self.pageCount, "\t", self.reqUrl, "\t", self.kd
             yield scrapy.http.FormRequest(response.request.url, formdata=d, method='POST', headers=self.header, callback=self.parse)
