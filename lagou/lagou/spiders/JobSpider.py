@@ -4,40 +4,36 @@ import sys
 import scrapy
 import json
 
+from scrapy.exceptions import CloseSpider
+
 class JobSpider(scrapy.Spider):
     allowed_domains = ["lagou.com"]
 
     name = 'Job'
 
-    '''paganation info'''
-    pageCount = 0
-    pageNo = 1
-
-    #current request url 
-    reqUrl = ''
-
-    #current kd
-    kd = ''
-
-    header = {
-        'Accept':'Accept:application/json, text/javascript, */*; q=0.01',
-        'Accept-Language':'zh-CN,zh;q=0.9,en;q=0.8',
-        'Accept-Encoding':'gzip, deflate, br',
-        'Host':'www.lagou.com',
-        'User-Agent':[
-            'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36',
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36 Edge/15.15063'
-        ],
-        'Referer':'https://www.lagou.com/jobs/list_PHP',
-        'X-Requested-With':'XMLHttpRequest',
-        'X-Anit-Forge-Token':'None',
-        'X-Anit-Forge-Code':'0'
-    }
-
     def start_requests(self):
         '''
         check job with multiple kd <key word> and multiple location
         '''
+
+        self.header = {
+            'Accept':'Accept:application/json, text/javascript, */*; q=0.01',
+            'Accept-Language':'zh-CN,zh;q=0.9,en;q=0.8',
+            'Accept-Encoding':'gzip, deflate, br',
+            'Host':'www.lagou.com',
+            'Origin':'https://www.lagou.com',
+            'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8',
+            'Referer':[
+                'https://www.lagou.com/jobs/list_PHP',
+                'https://www.lagou.com/jobs/list_PHP?px=default&jd=%E4%B8%8A%E5%B8%82%E5%85%AC%E5%8F%B8&city=%E4%B8%8A%E6%B5%B7&district=%E5%BE%90%E6%B1%87%E5%8C%BA&bizArea=%E6%BC%95%E5%AE%9D%E8%B7%AF',
+                'https://www.lagou.com/jobs/list_PHP?px=default&city=%E4%B8%8A%E6%B5%B7&district=%E5%BE%90%E6%B1%87%E5%8C%BA&bizArea=%E6%BC%95%E5%AE%9D%E8%B7%AF',
+                'https://www.lagou.com/jobs/list_Go?city=%E4%B8%8A%E6%B5%B7&district=%E5%BE%90%E6%B1%87%E5%8C%BA&bizArea=%E6%BC%95%E5%AE%9D%E8%B7%AF&cl=false&fromSearch=true&labelWords=&suginput=',
+                'https://www.lagou.com/jobs/list_Python?city=%E4%B8%8A%E6%B5%B7&district=%E5%BE%90%E6%B1%87%E5%8C%BA&bizArea=%E6%BC%95%E5%AE%9D%E8%B7%AF&cl=false&fromSearch=true&labelWords=&suginput='
+            ],
+            'X-Requested-With':'XMLHttpRequest',
+            'X-Anit-Forge-Token':'None',
+            'X-Anit-Forge-Code':'0'
+        }
 
         #list of multi query string spelled base on filterDict
         queryStringList = []
@@ -92,7 +88,7 @@ class JobSpider(scrapy.Spider):
 
             if (type(fks) == str or type(fks) == unicode) and len(fks) == 0:
                 continue
-            # print fks,' fks '
+            
             #spell query string such as: city=上海&…
             # print ' spell queryString ', fk, fks
             queryString = queryString + '%s=%s&' % (fk, fks)
@@ -127,10 +123,7 @@ class JobSpider(scrapy.Spider):
                         for tv2 in tv1:
                             #tv2
                             f, v = tv2.split('_')
-                            queryString1 = queryString1 + '%s=%s&' % (f, v)
-
-                            queryStringList.append( queryString + queryString1[0:-1] )
-                            print queryStringList, ' queryStringList '
+                            queryStringList.append( queryString + queryString1 + '%s=%s' % (f, v) )
 
                     elif type(tv1) == None:
                         #tk1
@@ -158,29 +151,24 @@ class JobSpider(scrapy.Spider):
 
                 queryStringList.append( queryString + queryString1[0:-1] )
 
-        # print queryStr[0:-1],' queryStr start_requests '
         #constant request url
+        
+        # print ','.join(queryStringList)
 
         for q in queryStringList:
 
-            self.reqUrl = 'https://www.lagou.com/jobs/positionAjax.json?%s' % q
+            reqUrl = 'https://www.lagou.com/jobs/positionAjax.json?%s' % q
 
             #dynamic form data
             for kd in kdList:
-                self.kd = kd
-                '''
-                dc = {'url':self.reqUrl, 'formdata':{'pn':self.pageNo,'kd':self.kd,'first':False}, 'method':'POST', 'headers':self.header, 'callback':self.parse}
-                print dc
-                sys.exit()
-                '''
-                yield scrapy.http.FormRequest(url=self.reqUrl, formdata={'pn':str(self.pageNo),'kd':self.kd,'first':'false'}, method='POST', headers=self.header, callback=self.parse)
+
+                print "1", "\t", reqUrl, "\t", kd
+
+                yield scrapy.http.FormRequest(url=reqUrl, formdata={'pn':'1','kd':kd,'first':'false'}, method='POST', headers=self.header, callback=self.parse)
 
     def parse(self, response):
-        fp = open('1.html','a+')
-        fp.write(response.body)
-        fp.close()
         '''
-        override处理下载的response的默认方法
+        override处理下载的response<TextResponse>的默认方法
 
         json body:
         {
@@ -199,15 +187,37 @@ class JobSpider(scrapy.Spider):
 
         }
         '''
-        
-
+        # print response.body
 
         jsonData = json.loads(response.body)
+
+        if jsonData.has_key('content') == False:
+            raise CloseSpider('Response has no content attribute')
+
         jsonContent = jsonData['content']
         jsonResult = jsonContent['positionResult']
         jsonItems = jsonResult['result']
-        # print jsonData, 'jsonData'
-        self.pageCount = jsonResult['totalCount'] / jsonContent['pageSize'] + 1
+   
+        totalPageCount = jsonResult['totalCount'] / jsonContent['pageSize'] + 1
+
+        # print jsonContent['pageNo'], "\t", jsonResult['resultSize'], "\t", jsonResult['totalCount']
+        # print type(response), response.request.body, response.request.url
+
+        
+        '''        
+            print jsonResult['resultSize'], "\t", jsonResult['totalCount'], "\t", totalPageCount
+        '''
+
+        #debug
+        
+        for (rk, rv) in jsonResult.items():
+            if rk == 'totalCount':
+                print '%s:%s' % (rk, rv)
+            elif rk == 'pageSize':
+                print '%s:%s' % (rk, rv)
+            elif rk == 'result':
+                print '%s:%s' % (rk, rv)
+        
 
         for e in jsonItems:
             '''
@@ -221,6 +231,28 @@ class JobSpider(scrapy.Spider):
             '''
             pass
             
-        if self.pageNo <= self.pageCount:
-            self.pageNo += 1
-            yield scrapy.http.FormRequest(url=self.reqUrl, formdata={'pn':str(self.pageNo),'kd':self.kd,'first':'false'}, method='POST', headers=self.header, callback=self.parse)
+        if jsonContent['pageNo'] < totalPageCount:
+            
+            #last request form data
+            d = self.__getFormDataFromResponse(response)
+            #next page
+            d['pn'] = int(d['pn']) + 1
+
+            # print self.pageNo, "\t", self.pageCount, "\t", self.reqUrl, "\t", self.kd
+            yield scrapy.http.FormRequest(response.request.url, formdata=d, method='POST', headers=self.header, callback=self.parse)
+
+    def __getFormDataFromResponse(self, response):
+        '''
+        返回响应对应的请求数据，dict类型
+        '''
+
+        d = {}
+
+        a = response.request.body.split('&')
+
+        for i in a:
+            k, v = i.split('=')
+            d[k] = v
+
+        return d
+        
