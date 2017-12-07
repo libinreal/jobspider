@@ -6,6 +6,9 @@ import json
 
 from scrapy.exceptions import CloseSpider
 
+from lagou.items import JobItem, JobItemLoader
+
+
 class JobSpider(scrapy.Spider):
     allowed_domains = ["lagou.com"]
 
@@ -48,7 +51,7 @@ class JobSpider(scrapy.Spider):
 
         #dict tree nodes key-val for spell query string, if value is empty set None
         filterDictTree = {
-            'city_上海':{'district_徐汇区':['bizArea_漕宝路', 'bizArea_上海南站', 'bizArea_植物园', 'bizArea_上海师大', 'bizArea_田林', 'bizArea_龙华']} # 方便遍历
+            'city_上海':{'district_徐汇区':['bizArea_漕宝路', 'bizArea_上海南站', 'bizArea_植物园', 'bizArea_上海师大', 'bizArea_田林', 'bizArea_龙华', 'bizArea_上海师大']} # 方便遍历
         }
 
         #key word list for search form-data
@@ -218,9 +221,9 @@ class JobSpider(scrapy.Spider):
             elif rk == 'result':
                 print '%s:%s' % (rk, rv)
         '''
-        print "\n\n",response.request.body
+        # print "\n\n",response.request.body
         for e in jsonItems:
-            
+            '''
             print e['companyId'] #公司id
             print e['positionId'] #职位id
             print e['subwayline'] #地铁线
@@ -229,17 +232,18 @@ class JobSpider(scrapy.Spider):
             print e['education']
             print e['industryField']
             print e['positionName']
+            '''
 
-        print "\n\n"
+        # print "\n\n"
         
-        if jsonContent['pageNo'] < totalPageCount:
+        if jsonContent['pageNo'] > 0 and jsonContent['pageNo'] < totalPageCount:
             
             #last request form data
             d = self.__getFormDataFromResponse(response)
             #next page
             d['pn'] = str( int(d['pn']) + 1 )
 
-            # print self.pageNo, "\t", self.pageCount, "\t", self.reqUrl, "\t", self.kd
+            # print response.request.url, "\t", d, "\t", totalPageCount, "\t", jsonResult['totalCount'] , "\t", jsonContent['pageSize']
             yield scrapy.http.FormRequest(response.request.url, formdata=d, method='POST', headers=self.header, callback=self.parse)
 
     def __getFormDataFromResponse(self, response):
@@ -259,8 +263,27 @@ class JobSpider(scrapy.Spider):
         
     def parse_job(self, response):
         '''
-        分析 https://www.lagou.com/jobs/3461000.html 的response,获取job detail
+        分析 https://www.lagou.com/jobs/3461000.html 的response,获取job descripition
         '''
-        response.body
+        jobItemLoader = JobItemLoader(item=JobItem(), response=response)
+        
+        jobItemLoader.add_xpath('company', "//img[@class='b2']/@alt")
+        jobItemLoader.add_xpath('department', "//div[@class='job-name']/div[@class='company']/text()")
+        jobItemLoader.add_xpath('job', "//div[@class='job-name']/span[@class='name']/text()")
+
+        jobItemLoader.add_xpath('companyid', "//input[@id='companyid']/@value")
+        jobItemLoader.add_xpath('jobid', "//input[@id='jobid']/@value")
+        jobItemLoader.add_xpath('industry', "//ul[@class='c_feature']/li[1]", re='</i>(.*)+<span')
+
+        jobItemLoader.add_xpath('jobid', "//input[@id='jobid']/@value")
+        jobItemLoader.add_xpath('jobid', "//input[@id='jobid']/@value")
+
+        jobItemLoader.add_xpath('jobid', "//div[@id='jobid']/@value")
+        jobItemLoader.add_xpath('jobid', "//input[@id='jobid']/@value")
+        jobItemLoader.add_xpath('jobid', "//input[@id='jobid']/@value")
+
+
+        
+    
 
 

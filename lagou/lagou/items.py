@@ -6,7 +6,7 @@
 # http://doc.scrapy.org/en/latest/topics/items.html
 
 import scrapy
-
+from scrapy.loader import ItemLoader
 
 class JobItem(scrapy.Item):
 	company = scrapy.Field()#公司名称
@@ -32,3 +32,5 @@ class JobItem(scrapy.Item):
 	subwayline = scrapy.Field()#地铁沿线
 	addr = scrapy.Field()#详细工作地址
 
+class JobItemLoader(scrapy.loader.ItemLoader):
+	default_input_processor = unicode.strip
