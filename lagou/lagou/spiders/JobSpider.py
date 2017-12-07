@@ -261,7 +261,6 @@ class JobSpider(scrapy.Spider):
         '''
         分析 https://www.lagou.com/jobs/3461000.html 的response,获取job detail
         '''
-        
+        response.body
 
 
-        
