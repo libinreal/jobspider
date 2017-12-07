@@ -28,7 +28,7 @@ class JobItem(scrapy.Item):
 	time = scrapy.Field()#发布时间
 	
 	description = scrapy.Field()#职位描述、任职要求
-	addr = scrapy.Field()#工作地址 x,y
+	pos = scrapy.Field()#x,y坐标
 	subwayline = scrapy.Field()#地铁沿线
-	pos = scrapy.Field()#工作地址
+	addr = scrapy.Field()#详细工作地址
 

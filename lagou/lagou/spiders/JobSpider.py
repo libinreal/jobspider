@@ -168,7 +168,7 @@ class JobSpider(scrapy.Spider):
 
     def parse(self, response):
         '''
-        override处理下载的response<TextResponse>的默认方法
+        override处理下载的positionAjax.json的response<TextResponse>的默认方法
 
         json body:
         {
@@ -256,4 +256,12 @@ class JobSpider(scrapy.Spider):
             d[k] = v
 
         return d
+        
+    def parse_job(self, response):
+        '''
+        分析 https://www.lagou.com/jobs/3461000.html 的response,获取job detail
+        '''
+        
+
+
         
