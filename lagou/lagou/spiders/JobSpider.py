@@ -14,6 +14,10 @@ class JobSpider(scrapy.Spider):
 
     name = 'Job'
 
+    custom_settings = {
+        'PLAT_FORM': 0
+    }
+
     def start_requests(self):
         '''
         check job with multiple kd <key word> and multiple location
@@ -267,20 +271,37 @@ class JobSpider(scrapy.Spider):
         '''
         jobItemLoader = JobItemLoader(item=JobItem(), response=response)
         
-        jobItemLoader.add_xpath('company', "//img[@class='b2']/@alt")
-        jobItemLoader.add_xpath('department', "//div[@class='job-name']/div[@class='company']/text()")
-        jobItemLoader.add_xpath('job', "//div[@class='job-name']/span[@class='name']/text()")
+        jobItemLoader.add_xpath('company', "//img[@class='b2']/@alt")#公司
+        jobItemLoader.add_xpath('department', "//div[@class='job-name']/div[@class='company']/text()")#部门
+        jobItemLoader.add_xpath('job', "//span[@class='ceil-job']/text()")#职位
 
-        jobItemLoader.add_xpath('companyid', "//input[@id='companyid']/@value")
-        jobItemLoader.add_xpath('jobid', "//input[@id='jobid']/@value")
-        jobItemLoader.add_xpath('industry', "//ul[@class='c_feature']/li[1]", re='</i>(.*)+<span')
+        jobItemLoader.add_xpath('companyid', "//input[@id='companyid']/@value")#公司id
+        jobItemLoader.add_xpath('jobid', "//input[@id='jobid']/@value")#职位id
+        jobItemLoader.add_xpath('industry', "//ul[@class='c_feature']/li[1]/text()", TakeFirst(), re=r"\S+")#领域 TakeFirst()
 
-        jobItemLoader.add_xpath('jobid', "//input[@id='jobid']/@value")
-        jobItemLoader.add_xpath('jobid', "//input[@id='jobid']/@value")
+        jobItemLoader.add_xpath('phase', "//ul[@class='c_feature']/li[2]/text()", TakeFirst(), re=r"\S+")#发展阶段
+        jobItemLoader.add_xpath('investors', "//ul[@class='c_feature']/li[3]/p/text()")#投资机构
+        jobItemLoader.add_xpath('scale', "//ul[@class='c_feature']/li[4]/text()", TakeFirst(), re=r"\S+")#规模
 
-        jobItemLoader.add_xpath('jobid', "//div[@id='jobid']/@value")
-        jobItemLoader.add_xpath('jobid', "//input[@id='jobid']/@value")
-        jobItemLoader.add_xpath('jobid', "//input[@id='jobid']/@value")
+        jobItemLoader.add_xpath('homepage', "//ul[@class='c_feature']/li[5]/a/text()")#公司主页url
+        jobItemLoader.add_xpath('salary', "//span[@class='ceil-salary']/text()")#月薪
+
+        jobItemLoader.add_xpath('experience', "//dd[@class='job_request']/p/span[3]/text()")#经验要求
+        jobItemLoader.add_xpath('education', "//dd[@class='job_request']/p/span[4]/text()")#学历要求
+        jobItemLoader.add_xpath('fulltime', "//dd[@class='job_request']/p/span[5]/text()")#全职/兼职    output: string -> int
+
+        jobItemLoader.add_xpath('label', "//ul[@class='position-label clearfix']/li/text()", Join(u','))#关键词/标签 output: [label,label]
+        # jobItemLoader.add_xpath('time', "//ul[@class='c_feature']/li[5]/a/text()")# 在 parse 方法中设置 #发布时间 
+        jobItemLoader.add_xpath('description', "//dd[@class='job_bt']/div/p/text()",Join())#职位描述
+        jobItemLoader.add_xpath('city', "//input[@name='workAddress']/@value")#职位描述
+
+        lng = response.xpath("//input[@name='positionLng']/@value").extract()
+        lat = response.xpath("//input[@name='positionLat']/@value").extract()
+        jobItemLoader.add_value('coordinate', lng + ',' + lat )#经纬度 Lng,Lat
+
+        # jobItemLoader.add_xpath('subwayline', "//ul[@class='c_feature']/li[5]/a/text()")#在 parse 方法中设置 #地铁沿线
+        jobItemLoader.add_xpath('address', "//input[@name='positionAddress']/@value")#街道地址
+        jobItemLoader.add_value('platform', self.settings['PLAT_FORM'])#平台标示
 
 
         

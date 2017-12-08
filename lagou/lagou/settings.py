@@ -80,7 +80,6 @@ ITEM_PIPELINES = {
 MONGODB_HOST = '192.168.68.128'
 MONGODB_PORT = 27017
 MONGODB_DB = 'social_listening'
-MONGODB_COLLECTION = 'jobs'
 
 
 # Enable and configure the AutoThrottle extension (disabled by default)
