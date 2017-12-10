@@ -6,7 +6,9 @@
 # http://doc.scrapy.org/en/latest/topics/items.html
 
 import scrapy
+
 from scrapy.loader import ItemLoader
+from scrapy.loader.processors import MapCompose, TakeFirst
 
 class JobItem(scrapy.Item):
 	company = scrapy.Field()#公司名称
@@ -25,7 +27,7 @@ class JobItem(scrapy.Item):
 	education = scrapy.Field()#学历要求
 	fulltime = scrapy.Field()#全职/兼职
 	label = scrapy.Field()#关键词/标签
-	time = scrapy.Field()#发布时间
+	createtime = scrapy.Field()#发布时间
 	
 	description = scrapy.Field()#职位描述、任职要求
 	coordinate = scrapy.Field()#x,y坐标
@@ -35,4 +37,5 @@ class JobItem(scrapy.Item):
 
 
 class JobItemLoader(scrapy.loader.ItemLoader):
-	default_input_processor = unicode.strip
+	default_input_processor = MapCompose(unicode, unicode.strip)
+	default_output_processor = TakeFirst()

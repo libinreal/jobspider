@@ -84,5 +84,6 @@ class UserAgentMiddleware(object):
     ]
 
     def process_request(self,request,spider):
-        UA = random.choice(self.user_agent_list)
-        request.headers['User-Agent'] = UA
+        ua = random.choice(self.user_agent_list)
+        if ua:
+            request.headers.setdefault('User-Agent', ua)

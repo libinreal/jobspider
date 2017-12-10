@@ -31,7 +31,7 @@ DOWNLOAD_DELAY = 5
 # The download delay setting will honor only one of:
 CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
-CONCURRENT_ITEMS = 30
+CONCURRENT_ITEMS = 16
 CONCURRENT_REQUESTS = 16
 
 # Disable cookies (enabled by default)
@@ -49,6 +49,8 @@ DEFAULT_REQUEST_HEADERS = {
 	'User-Agent':'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'
 }
 
+#duplicate request debug
+DUPEFILTER_DEBUG = True
 # Enable or disable spider middlewares <engine to spider>
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
@@ -104,7 +106,7 @@ MONGODB_DB = 'social_listening'
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 #是否启用logging
-LOG_ENABLED = False
+LOG_ENABLED = True
 
 #logging输出的文件名
 LOG_FILE = None
