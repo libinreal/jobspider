@@ -9,6 +9,9 @@ from scrapy.loader.processors import TakeFirst, Join
 
 from lagou.items import JobItem, JobItemLoader
 
+from scrapy.spidermiddlewares.httperror import HttpError
+from twisted.internet.error import DNSLookupError
+from twisted.internet.error import TimeoutError, TCPTimedOutError
 
 class JobSpider(scrapy.Spider):
     allowed_domains = ["lagou.com"]
