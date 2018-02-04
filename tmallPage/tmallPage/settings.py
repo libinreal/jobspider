@@ -19,7 +19,7 @@ NEWSPIDER_MODULE = 'tmallPage.spiders'
 #USER_AGENT = 'tmallPage (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -52,9 +52,12 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'tmallPage.middlewares.MyCustomDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+	'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware':None,
+	'tmallPage.middlewares.UserAgentMiddleware': 500,
+	'scrapy.downloadermiddlewares.redirect.RedirectMiddleware':None,
+	'tmallPage.middlewares.TaobaoRedirectMiddleware': 600,
+}
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
