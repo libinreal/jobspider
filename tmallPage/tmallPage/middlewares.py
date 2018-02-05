@@ -89,15 +89,64 @@ class UserAgentMiddleware(object):
 """  login redirect middleware """
 class TaobaoRedirectMiddleware(RedirectMiddleware):
     def _redirect(self, redirected, request, spider, reason):
-        if not self.is_anti_spider_url(redirected.url):
+        isLogin = self.isLoginUrl(redirected.url)
+        isCaptcha = self.isCaptchaUrl(redirected.url)
+        isPass = self.isPassUrl(redirected.url)
+        
+        redirected.dont_filter = True
+
+        if isLogin:
+            return self.solveLogin(redirected)
+        elif isCaptcha:
+            return self.solveCaptcha(redirected)
+        elif isPass:
+            return self.solvePass(redirected)
+        else:
             return super()._redirect(redirected, request, spider, reason)
+        # request.cookies
 
-        spider.logger.debug('Zipru threat defense triggered for %s' % request.url)
-        request.cookies = self.bypass_threat_defense(redirected.url)
-        request.dont_filter = True
-        return request
+    def isLoginUrl(self, url):
+        return 'login.taobao.com' in url
 
-    def is_anti_spider_url(self, url):
-        return 'login.taobao.com' in url or 'pass.tmall.com' in url
+    def isCaptchaUrl(self, url):
+        return 'sec.taobao.com' in url
 
-    def 
+    def isPassUrl(self, url):
+        return 'pass.tmall.com' in url
+
+    def solveCaptcha(self, redirected):
+        verifyFormAction = 'https://sec.taobao.com/query.htm'
+        
+        initVerifyFormData = {
+        'action': None,
+        'event_submit_do_query': None,
+        'smPolicy': None,
+        'smReturn': None,
+        'smApp': None,
+        'smCharset': None,
+        'smTag': None,
+        'smSign': None,
+        'identity': None,
+        'captcha': None,
+        'checkcode': None,
+        'ua': None
+        }
+
+        verifyFormHead = dict(self.initHead)
+
+        verifyFormData = dict(initVerifyFormData)
+
+        for vfk, vfv in verifyFormData.items():
+            verifyFormData[vfk] = response.xpath("//input[@name='%s']/@value" % vfk).extract()
+
+        redirected = request.replace(method='POST')
+        redirected = request.replace(url=verifyFormAction)
+        redirected = request.replace(body=verifyFormData)
+
+        return redirected
+
+    def solveLogin(self, redirected):
+        return redirected
+
+    def solvePass(self, redirected):
+        return redirected
