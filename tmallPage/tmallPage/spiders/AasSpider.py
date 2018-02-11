@@ -22,7 +22,7 @@ class AasSpider(scrapy.Spider):
 
     def parsePage(self, response):
       print "  response url \n", response.url, "\n"
-      proto, rest = urllib.splittype(url)
+      proto, rest = urllib.splittype(response.url)
       res, rest = urllib.splithost(rest)
       if res == 'sec.taobao.com':
         print ' input verify code '

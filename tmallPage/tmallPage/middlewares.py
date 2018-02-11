@@ -98,11 +98,11 @@ class TaobaoRedirectMiddleware(RedirectMiddleware):
         if isLogin:
             return self.solveLogin(redirected)
         elif isCaptcha:
-            return self.solveCaptcha(redirected)
+            return self.solveCaptcha(spider, redirected)
         elif isPass:
             return self.solvePass(redirected)
         else:
-            return super()._redirect(redirected, request, spider, reason)
+            return super(TaobaoRedirectMiddleware, self)._redirect(redirected, request, spider, reason)
         # request.cookies
 
     def isLoginUrl(self, url):
@@ -114,36 +114,26 @@ class TaobaoRedirectMiddleware(RedirectMiddleware):
     def isPassUrl(self, url):
         return 'pass.tmall.com' in url
 
-    def solveCaptcha(self, redirected):
+    def solveCaptcha(self, spider, redirected):
         verifyFormAction = 'https://sec.taobao.com/query.htm'
         
         initVerifyFormData = {
-        'action': None,
-        'event_submit_do_query': None,
-        'smPolicy': None,
-        'smReturn': None,
-        'smApp': None,
-        'smCharset': None,
-        'smTag': None,
-        'smSign': None,
-        'identity': None,
-        'captcha': None,
-        'checkcode': None,
-        'ua': None
+            'action': None,
+            'event_submit_do_query': None,
+            'smPolicy': None,
+            'smReturn': None,
+            'smApp': None,
+            'smCharset': None,
+            'smTag': None,
+            'smSign': None,
+            'identity': None,
+            'captcha': None,
+            'checkcode': None,
+            'ua': None
         }
 
-        verifyFormHead = dict(self.initHead)
-
-        verifyFormData = dict(initVerifyFormData)
-
-        for vfk, vfv in verifyFormData.items():
-            verifyFormData[vfk] = response.xpath("//input[@name='%s']/@value" % vfk).extract()
-
-        redirected = request.replace(method='POST')
-        redirected = request.replace(url=verifyFormAction)
-        redirected = request.replace(body=verifyFormData)
-
         return redirected
+
 
     def solveLogin(self, redirected):
         return redirected

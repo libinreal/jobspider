@@ -14,11 +14,11 @@ class LoginSpider(BaseSpider):
 		loginUrl = 'https://passport.lagou.com/login/login.html'
 
 		loginHeader = {
-			'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'
-			'Accept-Encoding':'gzip, deflate, br'
-			'Accept-Language':'zh-CN,zh;q=0.9,en;q=0.8'
-			'Cache-Control':'max-age=0'
-			'Connection':'keep-alive'
+			'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+			'Accept-Encoding':'gzip, deflate, br',
+			'Accept-Language':'zh-CN,zh;q=0.9,en;q=0.8',
+			'Cache-Control':'max-age=0',
+			'Connection':'keep-alive',
 
             'Accept':'Accept:application/json, text/javascript, */*; q=0.01',
             'Accept-Language':'zh-CN,zh;q=0.9,en;q=0.8',

@@ -8,7 +8,7 @@ from twisted.internet.error import TimeoutError, TCPTimedOutError
 
 class BaseSpider(scrapy.Spider):
 
-	def parse_err(self, failure):
+    def parse_err(self, failure):
         # log all failures
         self.logger.error(repr(failure))
 
