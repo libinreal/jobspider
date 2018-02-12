@@ -91,3 +91,13 @@ DOWNLOADER_MIDDLEWARES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+'''  temporary pagination generation on server of distribution using LAN IP '''
+TEMP_PAGINATION_IP = {
+	'192.168.2.22':['DMP_NOTEBOOK_BRAND' , 'DMP_CLEANER_BRAND', 'DMP_BAG_BRAND'],
+	'192.168.10.61':[],
+	'192.168.10.91':['DMP_MILK_BRAND'],
+	'192.168.10.97':['DMP_SAMPOO_BRAND', 'DMP_WINE_BRAND'],
+	'192.168.10.98':['DMP_DAILY_TASK' , 'DMP_PHONE_BRAND'],
+	'192.168.2.193':['test_name'],
+}
